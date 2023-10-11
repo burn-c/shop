@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import Head from 'next/head'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { GetStaticPaths, GetStaticProps } from 'next'
@@ -11,7 +13,6 @@ import {
   ProductContainer,
   ProductDetails,
 } from '@stylesPages/product'
-import { useState } from 'react'
 
 interface ProductProps {
   product: {
@@ -54,26 +55,32 @@ export default function Product({ product }: ProductProps) {
   }
 
   return (
-    <ProductContainer>
-      <ImageContainer>
-        <Image src={product?.imageUrl} width={520} height={480} alt="" />
-      </ImageContainer>
+    <>
+      <Head>
+        <title>{product.name} | Shop</title>
+      </Head>
 
-      <ProductDetails>
-        <h1>{product?.name}</h1>
-        <span>{product?.price}</span>
+      <ProductContainer>
+        <ImageContainer>
+          <Image src={product?.imageUrl} width={520} height={480} alt="" />
+        </ImageContainer>
 
-        <p>{product?.description}</p>
+        <ProductDetails>
+          <h1>{product?.name}</h1>
+          <span>{product?.price}</span>
 
-        <button
-          type="button"
-          onClick={handleBuyProduct}
-          disabled={isCreatingCheckoutSession}
-        >
-          {isCreatingCheckoutSession ? 'Carregando...' : 'Comprar agora'}
-        </button>
-      </ProductDetails>
-    </ProductContainer>
+          <p>{product?.description}</p>
+
+          <button
+            type="button"
+            onClick={handleBuyProduct}
+            disabled={isCreatingCheckoutSession}
+          >
+            {isCreatingCheckoutSession ? 'Carregando...' : 'Comprar agora'}
+          </button>
+        </ProductDetails>
+      </ProductContainer>
+    </>
   )
 }
 
