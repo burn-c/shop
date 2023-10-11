@@ -1,4 +1,7 @@
+import Image from 'next/image'
+import { useRouter } from 'next/router'
 import { GetStaticPaths, GetStaticProps } from 'next'
+import axios from 'axios'
 import Stripe from 'stripe'
 
 import { stripe } from 'src/lib/stripe'
@@ -8,8 +11,7 @@ import {
   ProductContainer,
   ProductDetails,
 } from '@stylesPages/product'
-import Image from 'next/image'
-import { useRouter } from 'next/router'
+import { useState } from 'react'
 
 interface ProductProps {
   product: {
@@ -23,7 +25,28 @@ interface ProductProps {
 }
 
 export default function Product({ product }: ProductProps) {
+  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
+    useState(false)
   const { isFallback } = useRouter()
+
+  async function handleBuyProduct() {
+    try {
+      setIsCreatingCheckoutSession(true)
+
+      const response = await axios.post('/api/checkout', {
+        priceId: product.defaultPriceId,
+      })
+
+      const { checkoutUrl } = response.data
+
+      window.location.href = checkoutUrl
+    } catch (err) {
+      // TODO: Conectar com uma ferramenta de observabilidade ( Datadog / Sentry)
+
+      alert('Falha ao redirecionar ao checkout!')
+      setIsCreatingCheckoutSession(false)
+    }
+  }
 
   // TODO: Adds Loader component or skeleton
   if (isFallback) {
@@ -42,7 +65,13 @@ export default function Product({ product }: ProductProps) {
 
         <p>{product?.description}</p>
 
-        <button>Comprar agora</button>
+        <button
+          type="button"
+          onClick={handleBuyProduct}
+          disabled={isCreatingCheckoutSession}
+        >
+          {isCreatingCheckoutSession ? 'Carregando...' : 'Comprar agora'}
+        </button>
       </ProductDetails>
     </ProductContainer>
   )
